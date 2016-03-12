@@ -8,7 +8,7 @@ module.exports = {
       "bitcoincharts_csv": ["./test/krakenLTC.csv", "BTC", "LTC", 10, 0]
     },
     "deciders": {
-      "trendfollower": ["5 day"]
+      "trendfollower": ["4 hour"]
     },
     "executers": {
       "backtest": []
