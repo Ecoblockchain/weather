@@ -5,6 +5,7 @@
     "test": "./node_modules/.bin/mocha"
   },
   "dependencies": {
+    "async": "^1.5.2",
     "chai": "^3.5.0",
     "line-by-line": "^0.1.4",
     "lodash": "^4.6.1",
