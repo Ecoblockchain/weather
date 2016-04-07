@@ -44,7 +44,7 @@ module.exports = [
 The configuration consists of specifying feeders, deciders and executers, that together form a strategy. Your configuration should be an array of one more strategies. Feeders, deciders, and executers have different responsibilities within a strategies:
 
 * Feeders feed market data and account state to the strategy. In the example above, we're feeding CSV data from the file `./test/krakenLTC.csv` that was pulled from [bitcoincharts](https://api.bitcoincharts.com/v1/csv/) for the purposes of backtesting. The currencies being traded are BTC and LTC, with starting amounts of 10 BTC and 0 LTC.
-* Deciders decide when to make and cancel trades, and decide trade amounts. Here we have a strategy of two deciders: One that follows the trend via candlesticks at a 5 minute resolution, confirming a trend after 5 successful candlesticks, while being loose when defining a trend (just as long as it's "up" or "down"). 
+* Deciders decide when to make and cancel trades, and decide trade amounts. Here we have a strategy of two deciders: One that follows the trend via candlesticks at a 5 minute resolution, confirming a trend after 5 successful candlesticks, while being loose when defining a trend (just as long as it's "up" or "down"); and the other cutting our losses after the market when the wrong direction by 25%. 
 * Executors execute the trades. Here we have a backtest executor which automatically fills all trades. 
 
 You can potentionally have multiple feeders, deciders and executors depending on your strategy. 
