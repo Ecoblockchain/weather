@@ -1,5 +1,5 @@
-module.exports = {
-  "test": {
+module.exports = [
+  {
     "limits": {
       "base": 10,
       "trade": 0
@@ -15,4 +15,4 @@ module.exports = {
       "backtest": []
     }
   }
-};
+];
