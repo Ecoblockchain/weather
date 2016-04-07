@@ -19,7 +19,7 @@ $ ./bin/weather.js -c ./example_config.js
 
 Configuration is a Javascript or JSON file that looks like this:
 
-```json
+```javascript
 module.exports = [
   {
     "limits": {
