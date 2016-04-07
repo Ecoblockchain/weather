@@ -77,6 +77,7 @@ Any and all help would be much appreciated. Here's what I think needs to be done
 * Graph trade output against the market to see when positions were opened or closed.
 * Trade executors and feeders: Poloniex, Kraken, Bitfinex, etc. 
 * More mathematical market analyzers like MACD and Bollinger Bands, moving averages, etc.
+* More realistic backtesting.
 
 
 ### Donate
