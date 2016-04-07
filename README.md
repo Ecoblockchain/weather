@@ -69,6 +69,10 @@ P/L %:  33.628463849473704
 Total P/L:  29.32120395863964
 ```  
 
+### Tuning Strategies
+
+You can use `./test/runner.js` to create very fine-tuned strategies and then run them in parallel using all your processor cores. Though it's a brute force method, you can fine tune your strategies to determine the best parameters for your specific markets.  
+
 ### Work Requests
 
 Any and all help would be much appreciated. Here's what I think needs to be done in the short term:
