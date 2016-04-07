@@ -5,9 +5,10 @@ module.exports = {
       "trade": 0
     },
     "feeders": {
-      "bitcoincharts_csv": ["./test/krakenLTC.csv", "BTC", "LTC", 10, 0]
+      "bitcoincharts_csv": ["./test/coinbaseUSD.csv", "BTC", "USD", 10, 0]
     },
     "deciders": {
+      //"guard": [.0005],
       "trendfollower": ["4 hour"]
     },
     "executers": {
