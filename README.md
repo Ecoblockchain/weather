@@ -22,16 +22,15 @@ Configuration is a Javascript or JSON file that looks like this:
 ```javascript
 module.exports = [
   {
-    "limits": {
-      "base": 10,
-      "trade": 0
-    },
     "feeders": {
       "bitcoincharts_csv": ["./test/krakenLTC.csv", "BTC", "LTC", 10, 0]
     },
+    "analyzers": {
+      "candlestick": ["5 minutes"]
+    },
     "deciders": {
       "guard": [.25],
-      "trendfollower": ["5 minutes", 5, true]
+      "trendfollower": [5]
     },
     "executers": {
       "backtest": []
@@ -41,15 +40,14 @@ module.exports = [
 
 ```
 
-The configuration consists of specifying feeders, deciders and executers, that together form a strategy. Your configuration should be an array of one more strategies. Feeders, deciders, and executers have different responsibilities within a strategies:
+The configuration consists of specifying feeders, analyzers, deciders and executers, that together form a strategy. Your configuration should be an array of one more strategies. Feeders, analyzers, deciders, and executers have different responsibilities within a strategy:
 
 * Feeders feed market data and account state to the strategy. In the example above, we're feeding CSV data from the file `./test/krakenLTC.csv` that was pulled from [bitcoincharts](https://api.bitcoincharts.com/v1/csv/) for the purposes of backtesting. The currencies being traded are BTC and LTC, with starting amounts of 10 BTC and 0 LTC.
-* Deciders decide when to make and cancel trades, and decide trade amounts. Here we have a strategy of two deciders: One that follows the trend via candlesticks at a 5 minute resolution, confirming a trend after 5 successful candlesticks, while being loose when defining a trend (just as long as it's "up" or "down"); and the other cutting our losses after the market goes the wrong direction by 25%. 
+* Analyzers use a specific formula or method to analyze the market and provide information to deciders. The analyzer specified in the example above takes tick data and converts it into candlesticks with 5 minute resolution that can be used by the deciders.
+* Deciders decide when to make and cancel trades, and decide trade amounts. Here we have a strategy of two deciders: One that follows the trend via the candlestick analyzer, confirming trends after 5 successful candlesticks; and the other cutting our losses after the market goes the wrong direction by 25%. 
 * Executors execute the trades. Here we have a backtest executor which automatically fills all trades. 
 
-You can potentionally have multiple feeders, deciders and executors depending on your strategy. 
-
-**Note:** The deciders abstraction will likely be broken up into two abstractions soon: deciders and analyzers. Analyzers can be shared between multiple deciders to reduce total processing between the deciders, whereas the deciders can focus solely on one thing: making decisions. Examples of analyziers might be turning market action into candlesticks, or performing MACD or Bollinger Band calculations.
+You can potentionally have multiple feeders, analyzers, deciders and executors depending on your strategy. Some deciders expect a specific analyzer to exist within the configuration and will error if the analyzer is not present.
 
 ### Output
 
@@ -60,7 +58,8 @@ When running `./bin/weather.js`, you'll get output for the most successful strat
 ------------------
 Strategy:
    Guard: 0.25
-   Trendfollower: 5 minutes,5,true
+   Trendfollower: 5,true
+   Candlestick: 5 minutes
 
 Total Trades:  114
 Profit:  44.17737732051443
@@ -77,7 +76,7 @@ You can use `./test/runner.js` to create very fine-tuned strategies and then run
 
 Any and all help would be much appreciated. Here's what I think needs to be done in the short term:
 
-* Break out deciders into both deciders and analyzers.
+* ~~Break out deciders into both deciders and analyzers.~~
 * Graph trade output against the market to see when positions were opened or closed.
 * Trade executors and feeders: Poloniex, Kraken, Bitfinex, etc. 
 * More mathematical market analyzers like MACD and Bollinger Bands, moving averages, etc.
