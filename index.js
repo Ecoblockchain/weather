@@ -8,31 +8,6 @@ var Farm = require('worker-farm/lib/farm');
 var farm = new Farm({maxRetries: 0}, require.resolve('./lib/worker'));
 var workers = farm.setup();
 
-var util = require("./lib/util");
-
-function printItem(item) {
-  Object.keys(item).forEach(function(key) {
-    var name = util.toTitleCase(key.replace("_", " "));
-    var value = item[key];
-    console.log("   " + name + ": " + value);
-  });
-}
-
-function print(result) {
-  console.log("------------------");
-  console.log("Strategy:")
-
-  printItem(result.strategy.deciders);
-  printItem(result.strategy.analyzers);
-
-  console.log("");
-  console.log("Total Trades: ", result.summary.total_trades);
-  console.log("Profit: ", result.summary.profit);
-  console.log("Loss: ", result.summary.loss);
-  console.log("P/L %: ", result.summary.profit_loss_percent * 100);
-  console.log("Total P/L: ", result.summary.total_profit_and_loss);
-};
-
 function killWorkers() {
   farm.childKeys().forEach(function(id) {
     farm.stopChild(id);
@@ -40,17 +15,17 @@ function killWorkers() {
   farm.end();
 }
 
-function run(strategies, parallel) {
-  var noun = "strategies";
-  if (strategies.length == 1) {
-    noun = "strategy";
-  }
-
+function run(strategies, parallel, summarize) {
   if (parallel == null) {
     parallel = true;
   }
 
   parallel = !!parallel;
+
+  var noun = "strategies";
+  if (strategies.length == 1) {
+    noun = "strategy";
+  }
 
   console.log("Running " + strategies.length + " " + noun + "...");
 
@@ -71,16 +46,14 @@ function run(strategies, parallel) {
     process.stdout.write(((count / strategies.length) * 100).toFixed(2) + "%");
   };
 
-  function printResults() {
+  function clearPercent() {
     process.stdout.clearLine();  // clear current text
     process.stdout.cursorTo(0);  // move cursor to beginning of line
-    console.log(highest.summary.positions)
-    print(highest);
   }
 
   if (!parallel) {
     async.eachSeries(strategies, function(strategy, finished) {
-      worker(strategy, function(err, result) {
+      worker(strategy, summarize, function(err, result) {
         if (err) return finished(err);
         recordResult(result);
         finished(null, result);
@@ -90,13 +63,11 @@ function run(strategies, parallel) {
         console.log(err.stack);
         return;
       }
-      printResults();
+      clearPercent();
     });
   } else {
-    var count = 0;
-
     strategies.forEach(function(run) {
-      workers(run, function (err, result) {
+      workers(run, summarize, function (err, result) {
         if (err) {
           console.log(err.stack);
           killWorkers();
@@ -108,7 +79,7 @@ function run(strategies, parallel) {
         recordResult(result);
 
         if (count == strategies.length) {
-          printResults();
+          clearPercent();
           farm.end();
         }
       });
@@ -117,6 +88,5 @@ function run(strategies, parallel) {
 };
 
 module.exports = {
-  print: print,
   run: run
 };

@@ -9,4 +9,4 @@ if (argv.config == null && argv.c == null) {
 }
 
 var config = require(path.resolve(argv.c || argv.config));
-weather.run(config);
+weather.run(config, true, !argv.q);
