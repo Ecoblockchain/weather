@@ -72,6 +72,10 @@ Total P/L:  29.32120395863964
 
 You can use `./test/runner.js` to create very fine-tuned strategies and then run them in parallel using all your processor cores. Though it's a brute force method, you can fine tune your strategies to determine the best parameters for your specific markets.  
 
+### Live Backtesting
+
+Not satisfied with testing your strategy against a bunch of old data? You don't have to. Just use a live feeder (such as the Poloniex feeder) with the backtest executor and get a good sense of how your strategy will perform in real time.
+
 ### Work Requests
 
 Any and all help would be much appreciated. Here's what I think needs to be done in the short term:

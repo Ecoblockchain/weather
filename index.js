@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 var fs = require("fs");
+var async = require("async");
+var worker = require("./lib/worker")
 var Farm = require('worker-farm/lib/farm');
 //var workers = new workerFarm(require.resolve('./lib/worker'));
 
-var farm = new Farm({maxRetries: 0, maxCallsPerWorker: 1}, require.resolve('./lib/worker'));
+var farm = new Farm({maxRetries: 0}, require.resolve('./lib/worker'));
 var workers = farm.setup();
 
 var util = require("./lib/util");
@@ -38,49 +40,76 @@ function killWorkers() {
   farm.end();
 }
 
-function run(strategies) {
+function run(strategies, parallel) {
   var noun = "strategies";
   if (strategies.length == 1) {
     noun = "strategy";
   }
+
+  parallel = !!parallel;
 
   console.log("Running " + strategies.length + " " + noun + "...");
 
   var count = 0;
   var highest = null;
 
-  strategies.forEach(function(run) {
-    workers(run, function (err, result) {
+  function recordResult(result) {
+    count += 1;
+
+    if (highest == null) {
+      highest = result
+    } else if (result.summary.total_profit_and_loss > highest.summary.total_profit_and_loss) {
+      highest = result
+    }
+
+    process.stdout.clearLine();  // clear current text
+    process.stdout.cursorTo(0);  // move cursor to beginning of line
+    process.stdout.write(((count / strategies.length) * 100).toFixed(2) + "%");
+  };
+
+  function printResults() {
+    process.stdout.clearLine();  // clear current text
+    process.stdout.cursorTo(0);  // move cursor to beginning of line
+    console.log(highest.summary.positions)
+    print(highest);
+  }
+
+  if (!parallel) {
+    async.eachSeries(strategies, function(strategy, finished) {
+      worker(strategy, function(err, result) {
+        if (err) return finished(err);
+        recordResult(result);
+        finished(null, result);
+      })
+    }, function(err) {
       if (err) {
         console.log(err.stack);
-        killWorkers();
         return;
       }
-
-      result = JSON.parse(result);
-
-      if (highest == null) {
-        highest = result
-      } else if (result.summary.total_profit_and_loss > highest.summary.total_profit_and_loss) {
-        highest = result
-      }
-
-      count += 1;
-
-      process.stdout.clearLine();  // clear current text
-      process.stdout.cursorTo(0);  // move cursor to beginning of line
-      process.stdout.write(((count / strategies.length) * 100).toFixed(2) + "%");
-
-      if (count == strategies.length) {
-        process.stdout.clearLine();  // clear current text
-        process.stdout.cursorTo(0);  // move cursor to beginning of line
-        console.log(highest.summary.positions)
-        fs.writeFileSync("./defaulttrades.out", JSON.stringify(highest.summary.positions), {encoding: "utf8"});
-        print(highest);
-        farm.end();
-      }
+      printResults();
     });
-  });
+  } else {
+    var count = 0;
+
+    strategies.forEach(function(run) {
+      workers(run, function (err, result) {
+        if (err) {
+          console.log(err.stack);
+          killWorkers();
+          return;
+        }
+
+        result = JSON.parse(result);
+
+        recordResult(result);
+
+        if (count == strategies.length) {
+          printResults();
+          farm.end();
+        }
+      });
+    });
+  }
 };
 
 module.exports = {

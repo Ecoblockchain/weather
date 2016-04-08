@@ -1,3 +1,4 @@
 test/coinbaseUSD.csv
 node_modules
 .DS_Store
+timsconfig.js
