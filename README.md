@@ -31,7 +31,7 @@ module.exports = [
     },
     "deciders": {
       "guard": [.25],
-      "trendfollower": ["5 minutes", 5, false]
+      "trendfollower": ["5 minutes", 5, true]
     },
     "executers": {
       "backtest": []
@@ -60,7 +60,7 @@ When running `./bin/weather.js`, you'll get output for the most successful strat
 ------------------
 Strategy:
    Guard: 0.25
-   Trendfollower: 5 minutes,5,false
+   Trendfollower: 5 minutes,5,true
 
 Total Trades:  114
 Profit:  44.17737732051443

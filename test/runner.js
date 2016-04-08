@@ -6,14 +6,16 @@ var weather = require("../index.js");
 var path = require("path")
 var _ = require("lodash")
 
-// extra closure to get proper scoping on 'i'
 var base_strategy = {
   "feeders": {
     "bitcoincharts_csv": ["./test/krakenLTC.csv", "BTC", "LTC", 10, 0]
   },
+  "analyzers": {
+    "candlestick": ["2 hour"]
+  },
   "deciders": {
     "guard": [.5],
-    "trendfollower": ["2 hour"]
+    "trendfollower": [5, true]
   },
   "executers": {
     "backtest": []
@@ -23,12 +25,13 @@ var base_strategy = {
 var runs = [];
 var count = 0;
 
-for (var r = 1; r <= 120; r++) {
+for (var r = 1; r <= 30; r++) {
   for (var surety = 2; surety <= 5; surety++) {
     for (var risk_percent = 0; risk_percent <= 3; risk_percent++) {
       var strategy = _.clone(base_strategy);
 
-      strategy.deciders.trendfollower = [r + " minutes", surety, false];
+      strategy.analyzers.candlestick = [r + " minutes"];
+      strategy.deciders.trendfollower = [surety, true];
       strategy.deciders.guard = [risk_percent * .05];
 
       runs.push(strategy);

@@ -1,19 +1,28 @@
 #!/usr/bin/env node
-var workerFarm = require('worker-farm');
-var workers = workerFarm(require.resolve('./lib/worker'));
+var fs = require("fs");
+var Farm = require('worker-farm/lib/farm');
+//var workers = new workerFarm(require.resolve('./lib/worker'));
+
+var farm = new Farm({maxRetries: 0, maxCallsPerWorker: 1}, require.resolve('./lib/worker'));
+var workers = farm.setup();
+
 var util = require("./lib/util");
+
+function printItem(item) {
+  Object.keys(item).forEach(function(key) {
+    var name = util.toTitleCase(key.replace("_", " "));
+    var value = item[key];
+    console.log("   " + name + ": " + value);
+  });
+}
 
 function print(result) {
   console.log("------------------");
   console.log("Strategy:")
 
-  var deciders = result.strategy.deciders;
+  printItem(result.strategy.deciders);
+  printItem(result.strategy.analyzers);
 
-  Object.keys(deciders).forEach(function(key) {
-    var name = util.toTitleCase(key.replace("_", " "));
-    var value = deciders[key];
-    console.log("   " + name + ": " + value);
-  });
   console.log("");
   console.log("Total Trades: ", result.summary.total_trades);
   console.log("Profit: ", result.summary.profit);
@@ -21,6 +30,13 @@ function print(result) {
   console.log("P/L %: ", result.summary.profit_loss_percent * 100);
   console.log("Total P/L: ", result.summary.total_profit_and_loss);
 };
+
+function killWorkers() {
+  farm.childKeys().forEach(function(id) {
+    farm.stopChild(id);
+  });
+  farm.end();
+}
 
 function run(strategies) {
   var noun = "strategies";
@@ -35,6 +51,12 @@ function run(strategies) {
 
   strategies.forEach(function(run) {
     workers(run, function (err, result) {
+      if (err) {
+        console.log(err.stack);
+        killWorkers();
+        return;
+      }
+
       result = JSON.parse(result);
 
       if (highest == null) {
@@ -53,8 +75,9 @@ function run(strategies) {
         process.stdout.clearLine();  // clear current text
         process.stdout.cursorTo(0);  // move cursor to beginning of line
         console.log(highest.summary.positions)
+        fs.writeFileSync("./defaulttrades.out", JSON.stringify(highest.summary.positions), {encoding: "utf8"});
         print(highest);
-        workerFarm.end(workers);
+        farm.end();
       }
     });
   });
