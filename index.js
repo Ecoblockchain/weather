@@ -46,6 +46,10 @@ function run(strategies, parallel) {
     noun = "strategy";
   }
 
+  if (parallel == null) {
+    parallel = true;
+  }
+
   parallel = !!parallel;
 
   console.log("Running " + strategies.length + " " + noun + "...");
