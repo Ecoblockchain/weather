@@ -96,7 +96,7 @@ There's still more work to be done to display all needed information on the grap
 Any and all help would be much appreciated. Here's what I think needs to be done in the short term:
 
 * ~~Break out deciders into both deciders and analyzers.~~
-* Graph trade output against the market to see when positions were opened or closed.
+* ~~Graph trade output against the market to see when positions were opened or closed.~~
 * Feeders: ~~Poloniex~~, Kraken, Bitfinex, etc.
 * Executors: Poloniex, Kraken, Bitfinex, etc. 
 * More mathematical market analyzers like MACD and Bollinger Bands, moving averages, etc.
